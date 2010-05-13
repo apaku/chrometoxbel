@@ -40,6 +40,25 @@ void printUsage()
     std::cout << "Usage:" << std::endl << "\t" << QCoreApplication::arguments().at(0).toLocal8Bit().data() << " <jsoninputfile> <xbeloutputfile>" << std::endl << std::endl;
 }
 
+class BookMark
+{
+public:
+    QString id;
+    QString name;
+    QString added;
+    QString url;
+};
+
+class Folder
+{
+public:
+    QString id;
+    QString name;
+    QString added;
+    QList<BookMark> bookmarks;
+    QList<Folder> folders;
+};
+
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     if( QCoreApplication::arguments().count() < 3 || QCoreApplication::arguments().count() == 2 && ( QCoreApplication::arguments().at(1) == "-h" || QCoreApplication::arguments().at(1) == "--help" ) ) {
