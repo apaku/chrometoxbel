@@ -38,7 +38,9 @@
 
 void printUsage()
 {
-    std::cout << "Usage:" << std::endl << "\t" << QCoreApplication::arguments().at(0).toLocal8Bit().data() << " <jsoninputfile> <xbeloutputfile>" << std::endl << std::endl;
+    std::cout << "Usage:" << std::endl << "\t"
+              << QCoreApplication::arguments().at(0).toLocal8Bit().data()
+              << " <jsoninputfile> <xbeloutputfile>" << std::endl << std::endl;
 }
 
 class BookMark
@@ -121,7 +123,10 @@ void writeFolder( QXmlStreamWriter* writer, const Folder& folder )
 
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
-    if( QCoreApplication::arguments().count() < 3 || QCoreApplication::arguments().count() == 2 && ( QCoreApplication::arguments().at(1) == "-h" || QCoreApplication::arguments().at(1) == "--help" ) ) {
+    if( QCoreApplication::arguments().count() < 3
+        || QCoreApplication::arguments().count() == 2
+        && ( QCoreApplication::arguments().at(1) == "-h"
+             || QCoreApplication::arguments().at(1) == "--help" ) ) {
         printUsage();
         return 1;
     }
@@ -156,12 +161,17 @@ int main(int argc, char **argv) {
     writer.setAutoFormatting( true );
 
     writer.writeStartDocument();
-    writer.writeDTD("<!DOCTYPE xbel PUBLIC \"+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML\" \"http://pyxml.sourceforge.net/topics/dtds/xbel-1.0.dtd\">");
+    writer.writeDTD("<!DOCTYPE xbel PUBLIC \"+//IDN python.org//DTD XML Bookmark"
+                    " Exchange Language 1.0//EN//XML\" "
+                    "\"http://pyxml.sourceforge.net/topics/dtds/xbel-1.0.dtd\">");
 
     writer.writeStartElement( "xbel" );
-    writer.writeAttribute( "xmlns:bookmark", "http://www.freedesktop.org/standards/desktop-bookmarks" );
-    writer.writeAttribute( "xmlns:mime", "http://www.freedesktop.org/standards/shared-mime-info" );
-    writer.writeAttribute( "xmlns:kdepriv", "http://www.kde.org/kdepriv" );
+    writer.writeAttribute( "xmlns:bookmark",
+                           "http://www.freedesktop.org/standards/desktop-bookmarks" );
+    writer.writeAttribute( "xmlns:mime",
+                           "http://www.freedesktop.org/standards/shared-mime-info" );
+    writer.writeAttribute( "xmlns:kdepriv",
+                           "http://www.kde.org/kdepriv" );
     foreach( const Folder& f, rootfolders ) {
         writeFolder( &writer, f );
     }
