@@ -28,6 +28,7 @@
 #include <QStringList>
 #include <QFile>
 #include <QVariant>
+#include <QXmlStreamWriter>
 
 #include <QDebug>
 
@@ -93,7 +94,31 @@ Folder readFolder( const QMap<QString,QVariant>& folder )
     return result;
 }
 
+void writeBookMark( QXmlStreamWriter* writer, const BookMark& mark )
+{
+    writer->writeStartElement( "bookmark" );
+    writer->writeAttribute( "id", mark.id );
+    writer->writeAttribute( "added", mark.added );
+    writer->writeAttribute( "href", mark.url );
+    writer->writeTextElement( "title", mark.name );
+    writer->writeEndElement();
 }
+
+void writeFolder( QXmlStreamWriter* writer, const Folder& folder )
+{
+    writer->writeStartElement( "folder" );
+    writer->writeAttribute( "id", folder.id );
+    writer->writeAttribute( "added", folder.added );
+    writer->writeTextElement( "title", folder.name );
+    foreach( const BookMark& m, folder.bookmarks ) {
+        writeBookMark( writer, m );
+    }
+    foreach( const Folder& sub, folder.folders ) {
+        writeFolder( writer, sub );
+    }
+    writer->writeEndElement();
+}
+
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     if( QCoreApplication::arguments().count() < 3 || QCoreApplication::arguments().count() == 2 && ( QCoreApplication::arguments().at(1) == "-h" || QCoreApplication::arguments().at(1) == "--help" ) ) {
@@ -122,6 +147,26 @@ int main(int argc, char **argv) {
         rootfolders << readFolder( roots[key].toMap() );
     }
 
+    if( !outputfile.open( QIODevice::WriteOnly ) ) {
+        qWarning() << "Cannot write to" << outputfile.fileName();
+        return -2;
+    }
+
+    QXmlStreamWriter writer( &outputfile );
+    writer.setAutoFormatting( true );
+
+    writer.writeStartDocument();
+    writer.writeDTD("<!DOCTYPE xbel PUBLIC \"+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML\" \"http://pyxml.sourceforge.net/topics/dtds/xbel-1.0.dtd\">");
+
+    writer.writeStartElement( "xbel" );
+    writer.writeAttribute( "xmlns:bookmark", "http://www.freedesktop.org/standards/desktop-bookmarks" );
+    writer.writeAttribute( "xmlns:mime", "http://www.freedesktop.org/standards/shared-mime-info" );
+    writer.writeAttribute( "xmlns:kdepriv", "http://www.kde.org/kdepriv" );
+    foreach( const Folder& f, rootfolders ) {
+        writeFolder( &writer, f );
+    }
+    writer.writeEndElement();
+    writer.writeEndDocument();
 
     return 0;
 }
