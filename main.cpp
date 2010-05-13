@@ -43,80 +43,36 @@ void printUsage()
               << " <jsoninputfile> <xbeloutputfile>" << std::endl << std::endl;
 }
 
-class BookMark
+void writeBookMark( QXmlStreamWriter* writer, const QMap<QString,QVariant>& mark )
 {
-public:
-    QString id;
-    QString name;
-    QString added;
-    QString url;
-};
-
-class Folder
-{
-public:
-    QString id;
-    QString name;
-    QString added;
-    QList<BookMark> bookmarks;
-    QList<Folder> folders;
-};
-
-BookMark readBookMark( const QMap<QString,QVariant>& bookmark )
-{
-    BookMark mark;
-    mark.id = bookmark["id"].toString();
-    mark.added = bookmark["date_added"].toString();
-    mark.name = bookmark["name"].toString();
-    mark.url = bookmark["url"].toString();
-    return mark;
+    writer->writeStartElement( "bookmark" );
+    writer->writeAttribute( "id", mark["id"].toString() );
+    writer->writeAttribute( "added", mark["date_added"].toString() );
+    writer->writeAttribute( "href", mark["url"].toString() );
+    writer->writeTextElement( "title", mark["name"].toString() );
+    writer->writeEndElement();
 }
 
-Folder readFolder( const QMap<QString,QVariant>& folder )
+void writeFolder( QXmlStreamWriter* writer, const QMap<QString,QVariant>& folder )
 {
-    Folder result;
-    QList<QVariant> children = folder["children"].toList();
-    result.name = folder["name"].toString();
-    result.added = folder["date_added"].toString();
-    result.id = folder["id"].toString();
-    foreach( const QVariant& child, children ) {
-        QMap<QString,QVariant> data = child.toMap();
+    writer->writeStartElement( "folder" );
+    writer->writeAttribute( "id", folder["id"].toString() );
+    writer->writeAttribute( "added", folder["date_added"].toString() );
+    writer->writeTextElement( "title", folder["name"].toString() );
+    foreach( const QVariant& m, folder["children"].toList() ) {
+        QMap<QString,QVariant> data = m.toMap();
         if( !data.contains("type") ) {
             qWarning() << "No type information in" << data;
             continue;
         }
-        if( data["type"] == "folder" ) {
-            result.folders << readFolder( data );
-        } else if( data["type"] == "url" ) {
-            result.bookmarks << readBookMark( data );
+        if( data["type"].toString() == "folder" ) {
+            writeFolder( writer, data );
+        } else if( data["type"].toString() == "url" ) {
+            writeBookMark( writer, data );
         } else {
             qWarning() << "Unknown child type:" << data["type"];
+            continue;
         }
-    }
-    return result;
-}
-
-void writeBookMark( QXmlStreamWriter* writer, const BookMark& mark )
-{
-    writer->writeStartElement( "bookmark" );
-    writer->writeAttribute( "id", mark.id );
-    writer->writeAttribute( "added", mark.added );
-    writer->writeAttribute( "href", mark.url );
-    writer->writeTextElement( "title", mark.name );
-    writer->writeEndElement();
-}
-
-void writeFolder( QXmlStreamWriter* writer, const Folder& folder )
-{
-    writer->writeStartElement( "folder" );
-    writer->writeAttribute( "id", folder.id );
-    writer->writeAttribute( "added", folder.added );
-    writer->writeTextElement( "title", folder.name );
-    foreach( const BookMark& m, folder.bookmarks ) {
-        writeBookMark( writer, m );
-    }
-    foreach( const Folder& sub, folder.folders ) {
-        writeFolder( writer, sub );
     }
     writer->writeEndElement();
 }
@@ -146,12 +102,6 @@ int main(int argc, char **argv) {
     QMap<QString,QVariant> objects = var.toMap();
     QMap<QString,QVariant> roots = objects["roots"].toMap();
 
-    QList<Folder> rootfolders;
-
-    foreach( const QString& key, roots.keys() ) {
-        rootfolders << readFolder( roots[key].toMap() );
-    }
-
     if( !outputfile.open( QIODevice::WriteOnly ) ) {
         qWarning() << "Cannot write to" << outputfile.fileName();
         return -2;
@@ -172,8 +122,8 @@ int main(int argc, char **argv) {
                            "http://www.freedesktop.org/standards/shared-mime-info" );
     writer.writeAttribute( "xmlns:kdepriv",
                            "http://www.kde.org/kdepriv" );
-    foreach( const Folder& f, rootfolders ) {
-        writeFolder( &writer, f );
+    foreach( const QString& key, roots.keys() ) {
+        writeFolder( &writer, roots[key].toMap() );
     }
     writer.writeEndElement();
     writer.writeEndDocument();
