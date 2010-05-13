@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xbel PUBLIC "+//IDN python.org//DTD XML Bookmark Exchange Language 1.0//EN//XML" "http://pyxml.sourceforge.net/topics/dtds/xbel-1.0.dtd">
+<xbel xmlns:bookmark="http://www.freedesktop.org/standards/desktop-bookmarks" xmlns:mime="http://www.freedesktop.org/standards/shared-mime-info" xmlns:kdepriv="http://www.kde.org/kdepriv">
+    <folder id="1" added="11644473600000000">
+        <title>Bookmarks Bar</title>
+        <bookmark id="20" added="12903832471969238" href="http://mybook.com">
+            <title>Book</title>
+        </bookmark>
+        <folder id="62" added="12908801584651600">
+            <title>myfolder</title>
+            <bookmark id="63" added="12908801584651970" href="http://myotherbook.com">
+                <title>Other book</title>
+            </bookmark>
+        </folder>
+    </folder>
+    <folder id="2" added="11644473600000000">
+        <title>Other Bookmarks</title>
+    </folder>
+</xbel>
