@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     QFile inputfile( QCoreApplication::arguments().at( 1 ) );
-    QFile outputfile( QCoreApplication::arguments().at( 1 ) );
+    QFile outputfile( QCoreApplication::arguments().at( 2 ) );
 
     QJson::Parser parser;
     bool ok;
