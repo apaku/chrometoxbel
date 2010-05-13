@@ -59,6 +59,41 @@ public:
     QList<Folder> folders;
 };
 
+BookMark readBookMark( const QMap<QString,QVariant>& bookmark )
+{
+    BookMark mark;
+    mark.id = bookmark["id"].toString();
+    mark.added = bookmark["date_added"].toString();
+    mark.name = bookmark["name"].toString();
+    mark.url = bookmark["url"].toString();
+    return mark;
+}
+
+Folder readFolder( const QMap<QString,QVariant>& folder )
+{
+    Folder result;
+    QList<QVariant> children = folder["children"].toList();
+    result.name = folder["name"].toString();
+    result.added = folder["date_added"].toString();
+    result.id = folder["id"].toString();
+    foreach( const QVariant& child, children ) {
+        QMap<QString,QVariant> data = child.toMap();
+        if( !data.contains("type") ) {
+            qWarning() << "No type information in" << data;
+            continue;
+        }
+        if( data["type"] == "folder" ) {
+            result.folders << readFolder( data );
+        } else if( data["type"] == "url" ) {
+            result.bookmarks << readBookMark( data );
+        } else {
+            qWarning() << "Unknown child type:" << data["type"];
+        }
+    }
+    return result;
+}
+
+}
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     if( QCoreApplication::arguments().count() < 3 || QCoreApplication::arguments().count() == 2 && ( QCoreApplication::arguments().at(1) == "-h" || QCoreApplication::arguments().at(1) == "--help" ) ) {
@@ -72,10 +107,19 @@ int main(int argc, char **argv) {
     bool ok;
     QVariant var = parser.parse( &inputfile, &ok );
 
-    if( ok ) {
-        qDebug() << var;
-    } else {
-        qDebug() << parser.errorString();
+
+    if( !ok ) {
+        qWarning() << "Error parsing input file:" << inputfile.fileName();
+        return -1;
+    }
+
+    QMap<QString,QVariant> objects = var.toMap();
+    QMap<QString,QVariant> roots = objects["roots"].toMap();
+
+    QList<Folder> rootfolders;
+
+    foreach( const QString& key, roots.keys() ) {
+        rootfolders << readFolder( roots[key].toMap() );
     }
 
 
