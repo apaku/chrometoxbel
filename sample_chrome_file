@@ -1,0 +1,42 @@
+{
+   "checksum": "56afe72f541e1f2003799acc795b4e41",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "12903832471969238",
+            "id": "20",
+            "name": "Book",
+            "type": "url",
+            "url": "http://mybook.com"
+        }, {
+            "children": [ {
+               "date_added": "12908801584651970",
+               "id": "63",
+               "name": "Other book",
+               "type": "url",
+               "url": "http://myotherbook.com"
+            } ],
+            "date_added": "12908801584651600",
+            "date_modified": "12908830178590420",
+            "id": "62",
+            "name": "myfolder",
+            "type": "folder"
+         } ],
+         "date_added": "11644473600000000",
+         "date_modified": "12915831087486960",
+         "id": "1",
+         "name": "Bookmarks Bar",
+         "type": "folder"
+      },
+      "other": {
+         "children": [ ],
+         "date_added": "11644473600000000",
+         "date_modified": "0",
+         "id": "2",
+         "name": "Other Bookmarks",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}
+
